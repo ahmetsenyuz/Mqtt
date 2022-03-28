@@ -1,8 +1,10 @@
-﻿
-using System.Text;
+﻿using System.Text;
 using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Client.Options;
+
+Console.Title = "ServerSide";
+
 
 MqttFactory mqttFactory = new MqttFactory();
 IMqttClient client = mqttFactory.CreateMqttClient();
@@ -16,7 +18,7 @@ var options = new MqttClientOptionsBuilder()
 client.UseConnectedHandler(x =>
 {
     Console.WriteLine("Servera Bağlanıldı");
-    var topicFilter = new TopicFilterBuilder().WithTopic("NODEServer").Build();
+    var topicFilter = new MqttTopicFilterBuilder().WithTopic("NODEServer").Build();
     client.SubscribeAsync(topicFilter);
 });
 
@@ -32,20 +34,20 @@ client.UseApplicationMessageReceivedHandler(x =>
 await client.ConnectAsync(options);
 
 Console.WriteLine("Çıkış yapmak için bir boş mesaj gönderin");
-bool devam = true;
-while (devam)
+bool resume = true;
+while (resume)
 {
-    await PublishMessageAsync(client,devam);
+    await PublishMessageAsync(client,resume);
 }
 
 await client.DisconnectAsync();
 
 async Task PublishMessageAsync(IMqttClient client, bool b)
 {
-    string messagePayload = Console.ReadLine();
+    string? messagePayload = Console.ReadLine();
     if (messagePayload == "")
     {
-        devam = false;
+        resume = false;
     }
     else
     {
